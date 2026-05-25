@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory Manager</title>
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            margin: 40px; 
+            background-color: #f8fafc; 
+            color: #334155; 
+        }
+        .wrapper { max-width: 900px; margin: 0 auto; }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+        }
+        h2 { color: #0f172a; margin: 0; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: white; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tr:hover td { background-color: #f8fafc; }
+        .sku-text { font-family: monospace; font-size: 0.95em; color: #0ea5e9; font-weight: 600; }
+        .btn { padding: 8px 14px; text-decoration: none; cursor: pointer; border-radius: 5px; border: none; font-size: 0.9em; font-weight: 500; }
+        .btn-add { background: #0ea5e9; color: white; }
+        .btn-add:hover { background: #0284c7; }
+        .btn-edit { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; margin-right: 5px; }
+        .btn-edit:hover { background: #16a34a; color: white; }
+        .btn-delete { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .btn-delete:hover { background: #dc2626; color: white; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <h2>Inventory Dashboard</h2>
+            <a href="manage.html" class="btn btn-add">+ Add New Product</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Stock Qty</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API = "http://localhost:5277/api/products"; 
+
+        async function loadInventory() {
+            try {
+                const res = await fetch(API);
+                const items = await res.json();
+                const tbody = document.getElementById("inventoryBody");
+                tbody.innerHTML = "";
+                
+                items.forEach(item => {
+                    const itemId = item.id || item._id; 
+                    const productSku = item.sku || item.SKU || 'N/A';
+                    const productName = item.name || item.Name || 'Unnamed Item';
+                    const productPrice = item.price !== undefined ? item.price : (item.Price || 0);
+                    const productQty = item.stockQuantity !== undefined ? item.stockQuantity : (item.StockQuantity || 0);
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="sku-text">${productSku}</span></td>
+                            <td><strong>${productName}</strong></td>
+                            <td>$${parseFloat(productPrice).toFixed(2)}</td>
+                            <td>${productQty}</td>
+                            <td>
+                                <a href="manage.html?id=${itemId}" class="btn btn-edit">Edit</a>
+                                <button onclick="removeItem('${itemId}')" class="btn btn-delete">Delete</button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (error) {
+                console.error("Error loading inventory:", error);
+            }
+        }
+
+        async function removeItem(id) {
+            if (confirm("Delete this inventory item?")) {
+                await fetch(`${API}/${id}`, { method: 'DELETE' });
+                loadInventory();
+            }
+        }
+        window.onload = loadInventory;
+    </script>
+</body>
+</html>
