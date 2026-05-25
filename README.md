@@ -52,7 +52,7 @@ Follow these step-by-step instructions to initialize and host the application en
 ## 📊 DataBase Preview
 
 ### SQL DataBase Preview
-![Database Picture](SQL DataBase.png)
+![Database Picture](sqldatabase.png)
 
 ## 📊 Live Product Addition Preview
 
